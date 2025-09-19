@@ -1,18 +1,13 @@
-const mongoose = require("mongoose");
-const config = require("./config.js");
+const mongoose=require("mongoose");
 
-const connectDb = async () => {
+
+const connectdb=async ()=>{
     try {
-        if (!config.database.connectionString) {
-            console.error("MongoDB connection string is missing. Please check your .env file.");
-            process.exit(1);
-        }
-        const connect = await mongoose.connect(config.database.connectionString);
-        console.log("Database connected:", connect.connection.host, connect.connection.name);
+        const connect=await mongoose.connect(process.env.CONNECTION_STRING)
+        console.log(connect.connection.host,connect.connection.name)
     } catch (err) {
-        console.error("Database connection failed:", err);
-        process.exit(1);
+        console.log(err)
+        process.exit(1)
     }
-};
-
-module.exports = connectDb;
+}
+module.exports=connectdb

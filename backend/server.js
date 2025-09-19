@@ -2,23 +2,31 @@ const express = require("express");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const routes = require("./routes/routes");
-
-dotenv.config();
-
+const connectDB = require('./config/mongodb');
+require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5000;
-
+const meowRoutes = require("./routes/meowroutes");
 // Middleware
 app.use(express.json());
 
 // Routes
-const userRoutes = require("./routes/userroutes");
 
 app.use("/", routes);
-app.use("/user", userRoutes);
+app.use("/meow", meowRoutes);
 
 
 
-  app.listen(PORT, () => { 
-    console.log(`Server is running on port ${PORT}`); 
-  });
+  const startServer = async () => {
+  try {
+    await connectDB();
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("Failed to connect to the database", error);
+    process.exit(1);
+  }
+};
+
+startServer();
