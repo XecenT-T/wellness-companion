@@ -72,8 +72,8 @@ export default function MEOWChat(){
                 <div className="text-muted text-center mt-12">Say hi to M.E.O.W. — try: "I'm anxious about exams"</div>
               )}
               {messages.map(m => (
-                <div key={m.id} className={`mb-3 max-w-3/4 ${m.from==="user" ? "ml-auto text-right" : "mr-auto text-left"}`}>
-                  <div className={`inline-block px-4 py-2 rounded-lg ${m.from==="user" ? "bg-teal-600 text-white" : "bg-white text-[var(--text-dark)]"} shadow-sm`}>
+                <div key={m.id} className={`mb-3 max-w-3/4 ${m.from === "user" ? "ml-auto text-right" : "mr-auto text-left"}`}>
+                  <div className={`inline-block px-4 py-2 rounded-lg ${m.from === "user" ? "bg-teal-600 text-white" : "bg-white text-[var(--text-dark)]"} shadow-sm`}>
                     {m.text}
                   </div>
                   <div className="text-xs text-muted mt-1">{new Date(m.ts).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</div>

@@ -1,73 +1,81 @@
 import React, { useEffect, useState } from "react";
-import Header from "./components/Header";
-import ResourceLibrary from "./components/ResourceLibrary";
+import Landing from "./Landing";
+import Home from "./Home";
+import Login from "./Login";
+import Journal from "./components/Journal";
 import MEOWChat from "./components/MEOWChat";
 import CounselorDashboard from "./components/CounselorDashboard";
-import SOSButton from "./components/SOSButton";
-import OfflineManager from "./components/OfflineManager";
-import Journal from "./components/Journal";
+import Header from "./components/Header";
 import Footer from "./components/Footer";
+import Resources from "./components/Resources";
+import HomeNavigation from "./components/HomeNavigation";
 
-const QUOTES = [
-  { text: "The only way out is through.", author: "Robert Frost" },
-  { text: "You must do the things you think you cannot do.", author: "Eleanor Roosevelt" },
-  { text: "In the middle of difficulty lies opportunity.", author: "Albert Einstein" },
-  { text: "Act as if what you do makes a difference. It does.", author: "William James" },
-  { text: "Happiness can be found, even in the darkest of times.", author: "J.K. Rowling" },
-  { text: "When we are no longer able to change a situation, we are challenged to change ourselves.", author: "Viktor E. Frankl" },
-  { text: "The greatest glory in living lies not in never falling, but in rising every time we fall.", author: "Nelson Mandela" },
-  { text: "You are never too old to set another goal or to dream a new dream.", author: "C.S. Lewis" },
-  { text: "Courage doesn't always roar. Sometimes courage is the quiet voice at the end of the day saying 'I will try again tomorrow.'", author: "Mary Anne Radmacher" },
-  { text: "Do not dwell in the past, do not dream of the future, concentrate the mind on the present moment.", author: "Buddha" },
-  { text: "Small deeds done are better than great deeds planned.", author: "Peter Marshall" },
-  { text: "What lies behind us and what lies before us are tiny matters compared to what lies within us.", author: "Ralph Waldo Emerson" },
-];
+const protectedRoutes = ["/home", "/meow", "/journal", "/dashboard", "/resources"];
 
-export default function App() {
-  const [quoteIndex, setQuoteIndex] = useState(() => Math.floor(Math.random() * QUOTES.length));
+/**
+ * Simple path router (no react-router)
+ * - Adds window.navigate(to) for in-app navigation (uses history.pushState)
+ * - Listens to popstate so back/forward works
+ */
+function getRouteComponent(pathname) {
+  const isAuthenticated = !!localStorage.getItem("accessToken");
 
-  useEffect(() => {
-    const id = setInterval(() => {
-      setQuoteIndex(i => (i + 1) % QUOTES.length);
-    }, 8000);
-    return () => clearInterval(id);
-  }, []);
+  if (protectedRoutes.includes(pathname) && !isAuthenticated) {
+    return <Login />;
+  }
 
-  const quote = QUOTES[quoteIndex];
+  if (pathname === "/" || pathname === "/landing") return <Landing />;
+  if (pathname === "/home") return <Home />;
+  if (pathname === "/login") return <Login />;
+  if (pathname === "/meow" || pathname === "/chat") return <MEOWChat />;
+  if (pathname === "/dashboard" || pathname === "/counselor") return <CounselorDashboard />;
+  if (pathname === "/resources") return <Resources />;
+
+  if (pathname === "/journal") return <Journal />;
+  const journalMatch = pathname.match(/^\/journal\/([^/]+)$/);
+  if (journalMatch) return <Journal journalId={journalMatch[1]} />;
 
   return (
-    <>
-      <Header />
+    <div style={{ padding: 24 }}>
+      <h2>Page not found</h2>
+      <p>No client-side view for {pathname}</p>
+    </div>
+  );
+}
 
-      <main id="home" className="section container-center">
-        <section className="card hero text-center p-10">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Hello, User</h1>
+export default function App() {
+  const [path, setPath] = useState(typeof window !== "undefined" ? window.location.pathname : "/");
 
-          <div className="quote-container mx-auto max-w-2xl mt-2 mb-6">
-            <blockquote className="quote text-xl md:text-2xl italic text-[var(--teal)]">
-              “{quote.text}”
-            </blockquote>
-            <div className="text-sm text-muted mt-2">— {quote.author}</div>
-            <div className="mt-4">
-              <a href="#library" className="btn btn-primary">Explore Resources</a>
-            </div>
-          </div>
-        </section>
-      </main>
+  useEffect(() => {
+    const onPop = () => setPath(window.location.pathname);
+    window.addEventListener("popstate", onPop);
 
-      <ResourceLibrary />
-      <section id="offline" className="section container-center">
-        <OfflineManager />
-      </section>
-      <MEOWChat />
-      <Journal />
-      <CounselorDashboard />
+    // expose navigate() so Header and other components can call it
+    window.navigate = (to) => {
+      if (!to || typeof to !== "string") return;
+      if (to === window.location.pathname) return;
+      history.pushState({}, "", to);
+      setPath(to);
+    };
 
-      <div id="sos" style={{ position: "fixed", right: 20, bottom: 24, zIndex: 60 }}>
-        <SOSButton />
-      </div>
+    return () => {
+      window.removeEventListener("popstate", onPop);
+      try {
+        delete window.navigate;
+      } catch (_) {}
+    };
+  }, []);
 
-      <Footer />
-    </>
+  const Page = getRouteComponent(path);
+  const showHeaderFooter = !protectedRoutes.includes(path) && path !== "/login";
+  const showHomeNavigation = protectedRoutes.includes(path);
+
+  return (
+    <div className="app-root">
+      {showHeaderFooter && <Header />}
+      {showHomeNavigation && <HomeNavigation />}
+      <main>{Page}</main>
+      {showHeaderFooter && <Footer />}
+    </div>
   );
 }

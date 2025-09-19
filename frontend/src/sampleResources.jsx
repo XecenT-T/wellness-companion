@@ -22,5 +22,22 @@ export const SAMPLE_RESOURCES = [
 		category: 'depression',
 		description: 'Short explainer on symptoms and when to seek help.',
 		url: ''
+	},
+	{
+		title: "Breathing Exercise",
+		href: "/resources/breathing",
+		description: "Quick 5-minute breathing practice."
+	},
+	{
+		title: "Grounding Techniques",
+		href: "/resources/grounding",
+		description: "Simple grounding exercises to reduce anxiety."
+	},
+	{
+		title: "Daily Walk Checklist",
+		href: "/resources/walk",
+		description: "Ideas for a mindful walk and reflection prompts."
 	}
-]
+];
+
+export default SAMPLE_RESOURCES;

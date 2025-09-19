@@ -1,64 +1,102 @@
 import React, { useState } from "react";
+import "./Login.css";
 
+/**
+ * Posts credentials to /api/login
+ * - Stores returned token in localStorage (key: accessToken)
+ * - Redirects to /home on success
+ */
 export default function Login() {
-  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [status, setStatus] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    setError("");
-    const cleaned = phone.replace(/\D/g, "");
-    if (cleaned.length < 7) {
-      setError("Please enter a valid phone number.");
+    setStatus("Logging in...");
+    setLoading(true);
+
+    // Mock login check
+    if (email === "123" && password === "admin") {
+      localStorage.setItem("accessToken", "mock-token");
+      setStatus("Login successful — redirecting...");
+      setTimeout(() => window.location.assign("/home"), 400);
+      setLoading(false);
       return;
     }
-    if (password.length < 4) {
-      setError("Please enter a password of at least 4 characters.");
-      return;
+
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      // try to parse JSON, but handle raw-string responses too
+      let data;
+      try {
+        data = await res.json();
+      } catch (jsonErr) {
+        // fallback if server returns raw token string
+        data = await res.text();
+      }
+
+      if (res.ok) {
+        // support multiple shapes: raw string, { accessToken: "..." }, { token: "..." }
+        const token =
+          typeof data === "string"
+            ? data
+            : data?.accessToken || data?.token || data?.access_token || null;
+
+        if (token) {
+          localStorage.setItem("accessToken", token);
+          setStatus("Login successful — redirecting...");
+          // small delay so user sees message, then navigate
+          setTimeout(() => window.location.assign("/home"), 400);
+        } else {
+          // no token returned, but OK status — show raw response
+          setStatus("Login succeeded but no token returned: " + JSON.stringify(data));
+        }
+      } else {
+        const errMsg = (data && (data.error || data.message)) || JSON.stringify(data);
+        setStatus("Login failed: " + errMsg);
+      }
+    } catch (err) {
+      setStatus("Network error: " + String(err));
+    } finally {
+      setLoading(false);
     }
-    const user = { phone: cleaned, created: Date.now() };
-    localStorage.setItem("wc_user", JSON.stringify(user));
-    window.location.hash = "app";
   }
 
   return (
-    <section id="login-page" className="section container-center">
-      <div className="max-w-md mx-auto">
-        <div className="card p-8 text-center">
-          <h2 className="text-2xl font-semibold mb-2">Sign in / Sign up</h2>
-          <p className="text-sm text-muted mb-6">Enter your phone number and password to continue.</p>
-
-          <form onSubmit={handleSubmit} className="space-y-4 text-left">
-            <label className="text-sm">Phone number</label>
-            <input
-              className="input w-full"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="e.g. +1 555 123 4567"
-              inputMode="tel"
-            />
-
-            <label className="text-sm">Password</label>
-            <input
-              className="input w-full"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter a password"
-              type="password"
-            />
-
-            {error && <div className="text-sm text-red-600">{error}</div>}
-
-            <div className="flex gap-3">
-              <button type="submit" className="btn btn-primary w-full">Continue</button>
-              <a href="#home" className="btn btn-ghost w-full">Back</a>
-            </div>
-          </form>
-
-          <div className="text-sm text-muted mt-4">Your data is stored locally for demo purposes.</div>
+    <div className="login-container">
+      <form className="login-form" onSubmit={handleSubmit}>
+        <h2>Login</h2>
+        <div>
+          <input
+            placeholder="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
         </div>
-      </div>
-    </section>
+        <div>
+          <input
+            placeholder="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        <div style={{ marginTop: 8 }}>
+          <button type="submit" disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
+          </button>
+        </div>
+        {status && <div style={{ marginTop: 12 }}>{status}</div>}
+      </form>
+    </div>
   );
 }

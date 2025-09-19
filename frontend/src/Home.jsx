@@ -1,41 +1,42 @@
-import React, { useEffect, useState } from "react";
-import ReactDOM from "react-dom/client";
-import Header from "./components/Header";
-import App from "./App";
-import Landing from "./components/Landing";
-import Login from "./components/Login";
-import "./styles.css";
+import React from "react";
+import HomeNavigation from "./components/HomeNavigation";
+import Resources from "./components/Resources";
+import Journal from "./components/Journal";
+import CounselorDashboard from "./components/CounselorDashboard";
+import RandomQuote from "./components/RandomQuote";
+import Footer from "./components/Footer";
+import SOSButton from "./components/SOSButton";
+import MeowChat from "./components/MEOWChat";
+import "./Home.css";
 
-function Router() {
-  const [route, setRoute] = useState(() => (window.location.hash.replace("#", "") || "home"));
-  const [authed, setAuthed] = useState(!!localStorage.getItem("wc_user"));
-
-  useEffect(() => {
-    const onHash = () => setRoute(window.location.hash.replace("#", "") || "home");
-    window.addEventListener("hashchange", onHash);
-    return () => window.removeEventListener("hashchange", onHash);
-  }, []);
-
-  useEffect(() => {
-    const onStorage = () => setAuthed(!!localStorage.getItem("wc_user"));
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
-  }, []);
-
-  if (route === "app" && !authed) {
-    window.location.hash = "login";
-    return null;
-  }
+export default function Home() {
+  const username = "johndoe"; // Placeholder
 
   return (
-    <>
-      <Header />
-      <main>
-        {route === "login" ? <Login /> : route === "app" ? <App /> : <Landing />}
+    <div>
+      
+      <main style={{ padding: 16 }}>
+        <section id="home" className="welcome-section">
+          <h2 className="welcome-gradient">Welcome, {username}</h2>
+          <RandomQuote />
+        </section>
+        <section id="resources">
+          <Resources />
+        </section>
+        <section id="chat">
+            <MeowChat /> 
+        </section>
+        <section id="journal">
+          <Journal />
+        </section>
+        <section id="dashboard">
+          <CounselorDashboard />
+        </section>
+        <section>
+            <Footer/>
+        </section>
       </main>
-    </>
+      <SOSButton />
+    </div>
   );
 }
-
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(<Router />);

@@ -1,6 +1,5 @@
 // ...existing code...
 import React from "react";
-import Footer from "./components/Footer";
 
 export default function Landing() {
   return (
@@ -13,7 +12,7 @@ export default function Landing() {
         </p>
 
         <div className="flex justify-center gap-4 mb-8">
-          <a href="#login" className="btn btn-primary">Sign In / Sign Up</a>
+          <a href="/login" className="btn btn-primary">Sign In / Sign Up</a>
         </div>
       </div>
 
@@ -45,7 +44,7 @@ export default function Landing() {
 
         <div className="card p-6">
           <h3 className="font-semibold mb-2">Counseling & Self-Help Tools</h3>
-          <p className="text-sm text-muted mb-2">
+          <p className_="text-sm text-muted mb-2">
             Book licensed counselors, explore vetted resources, and download offline kits like the Exam Stress Decompression Kit.
           </p>
           <ul className="text-sm space-y-1">
@@ -65,7 +64,7 @@ export default function Landing() {
         </div>
       </div>
 
-      <Footer />
+
     </section>
   );
 }
