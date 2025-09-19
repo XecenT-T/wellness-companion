@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-export default function Header() {
+export default function HomeNavigation() {
   const [open, setOpen] = useState(false);
 
   return (
@@ -13,8 +13,8 @@ export default function Header() {
         <nav className="app-nav">
           <div className="links" role="navigation" aria-label="Main navigation">
             <a href="#home">Home</a>
-            <a href="#library">Resources</a>
-            <a href="#chat">Chat</a>
+            <a href="#resources">Resources</a>
+            <a href="#meow">Chat</a>
             <a href="#counselor">Counselor</a>
           </div>
 
@@ -37,7 +37,8 @@ export default function Header() {
           </div>
         </nav>
 
-        <div className={mobile-panel ${open ? "open" : ""}} role="menu" aria-hidden={!open}>
+        {/* --- THIS LINE IS FIXED --- */}
+        <div className={`mobile-panel ${open ? "open" : ""}`} role="menu" aria-hidden={!open}>
           <div className="flex flex-col gap-2">
             <a href="#home" className="px-3 py-2 rounded-md" onClick={() => setOpen(false)}>Home</a>
             <a href="#library" className="px-3 py-2 rounded-md" onClick={() => setOpen(false)}>Resources</a>
