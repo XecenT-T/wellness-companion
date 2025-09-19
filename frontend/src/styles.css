@@ -305,3 +305,17 @@ h3 { @apply text-xl md:text-2xl mb-2; }
 .resource-card .text-muted { color: var(--muted); }
 
 /* ...existing code... */
+/* ...existing code... */
+
+/* Landing page: stacked vertical feature cards and spacing */
+#landing .max-w-4xl { width: 100%; }
+#landing .card { width: 100%; border-radius: 12px; }
+#landing .card + .card { margin-top: 1rem; }
+#landing .lead { font-size: 1.05rem; color: var(--muted); }
+#landing .btn-primary { padding: .7rem 1.1rem; }
+
+/* Footer adjustments to ensure good spacing when used on landing */
+.app-footer { padding-top: 2.5rem; padding-bottom: 2.5rem; }
+@media (min-width: 768px) {
+  #landing .max-w-4xl { max-width: 900px; }
+}
