@@ -3,24 +3,34 @@ import React, { useState } from "react";
 export default function HomeNavigation() {
   const [open, setOpen] = useState(false);
 
+  function handleLogout() {
+    localStorage.removeItem("accessToken");
+    window.navigate("/");
+  }
+
+  const navigate = (e, path) => {
+    e.preventDefault();
+    window.navigate(path);
+    setOpen(false);
+  }
+
   return (
     <header className="header-glass sticky top-0 z-50">
       <div className="container-center flex items-center justify-between py-4 relative">
-        <a href="#home" className="brand">
+        <a href="/home" onClick={(e) => navigate(e, '/home')} className="brand">
           <span className="font-semibold text-lg">Wellness Companion</span>
         </a>
 
         <nav className="app-nav">
           <div className="links" role="navigation" aria-label="Main navigation">
-            <a href="#home">Home</a>
-            <a href="#resources">Resources</a>
-            <a href="#meow">Chat</a>
-            <a href="#counselor">Counselor</a>
+            <a href="/home" onClick={(e) => navigate(e, '/home')}>Home</a>
+            <a href="/resources" onClick={(e) => navigate(e, '/resources')}>Resources</a>
+            <a href="/meow" onClick={(e) => navigate(e, '/meow')}>Chat</a>
+            <a href="/counselor" onClick={(e) => navigate(e, '/counselor')}>Counselor</a>
           </div>
 
           <div className="controls">
-            <a href="#sos" className="sos" aria-label="SOS">SOS</a>
-            <a href="#library" className="btn btn-primary">Find Help</a>
+            <button onClick={handleLogout} className="btn btn-primary">Log Out</button>
 
             <button
               className="mobile-toggle md:hidden ml-2 p-2 rounded-md focus:outline-none"
@@ -40,14 +50,13 @@ export default function HomeNavigation() {
         {/* --- THIS LINE IS FIXED --- */}
         <div className={`mobile-panel ${open ? "open" : ""}`} role="menu" aria-hidden={!open}>
           <div className="flex flex-col gap-2">
-            <a href="#home" className="px-3 py-2 rounded-md" onClick={() => setOpen(false)}>Home</a>
-            <a href="#library" className="px-3 py-2 rounded-md" onClick={() => setOpen(false)}>Resources</a>
-            <a href="#chat" className="px-3 py-2 rounded-md" onClick={() => setOpen(false)}>Chat</a>
-            <a href="#counselor" className="px-3 py-2 rounded-md" onClick={() => setOpen(false)}>Counselor</a>
+            <a href="/home" className="px-3 py-2 rounded-md" onClick={(e) => navigate(e, '/home')}>Home</a>
+            <a href="/resources" className="px-3 py-2 rounded-md" onClick={(e) => navigate(e, '/resources')}>Resources</a>
+            <a href="/meow" className="px-3 py-2 rounded-md" onClick={(e) => navigate(e, '/meow')}>Chat</a>
+            <a href="/counselor" className="px-3 py-2 rounded-md" onClick={(e) => navigate(e, '/counselor')}>Counselor</a>
 
             <div className="flex items-center gap-2 pt-2">
-              <a href="#sos" className="sos" aria-label="SOS">SOS</a>
-              <a href="#library" className="btn btn-primary" onClick={() => setOpen(false)}>Find Help</a>
+              <button onClick={handleLogout} className="btn btn-primary">Log Out</button>
             </div>
           </div>
         </div>
