@@ -4,7 +4,7 @@ async function getBotReply(message) {
   try {
     const token = localStorage.getItem("accessToken");
     console.log("Token from localStorage in MEOWChat.jsx (getBotReply):", token);
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/meow`, {
+    const response = await fetch(`/api/meow`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -34,7 +34,7 @@ export default function MEOWChat(){
       try {
         const token = localStorage.getItem("accessToken");
         console.log("Token from localStorage in MEOWChat.jsx (fetchChatHistory):", token);
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/meow/history`, {
+        const response = await fetch(`/api/meow/history`, {
           headers: {
             "Authorization": `Bearer ${token}`,
           },

@@ -32,7 +32,7 @@ export default function Journal() {
       try {
         const token = localStorage.getItem("accessToken");
         console.log("Token from localStorage in Journal.jsx:", token);
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/journal`, {
+        const res = await fetch(`/api/journal`, {
           headers: {
             "Authorization": `Bearer ${token}`,
           },
@@ -51,7 +51,7 @@ export default function Journal() {
   useEffect(() => {
     const fetchJournalCount = async () => {
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/journal/count`);
+            const res = await fetch(`/api/journal/count`);
             if(res.ok) {
                 const data = await res.json();
                 setTrees(data.count);
@@ -69,7 +69,7 @@ export default function Journal() {
     try {
       const token = localStorage.getItem("accessToken");
       console.log("Token from localStorage in Journal.jsx (saveEntry):", token);
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/journal`, {
+      const res = await fetch(`/api/journal`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
