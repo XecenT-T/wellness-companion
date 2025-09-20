@@ -1,49 +1,32 @@
 import React, { useState } from "react";
 import "./Login.css";
 
-/**
- * Posts credentials to /api/login
- * - Stores returned token in localStorage (key: accessToken)
- * - Redirects to /home on success
- */
 export default function Login() {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setStatus("Logging in...");
+    setStatus(null);
     setLoading(true);
 
-    // Mock login check
-    if (email === "123" && password === "admin") {
-      localStorage.setItem("accessToken", "mock-token");
-      setStatus("Login successful — redirecting...");
-      setTimeout(() => window.location.assign("/home"), 400);
-      setLoading(false);
-      return;
-    }
-
     try {
-      const res = await fetch("/api/login", {
+      const res = await fetch("http://localhost:3000/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username, password }),
       });
 
-      // try to parse JSON, but handle raw-string responses too
       let data;
       try {
         data = await res.json();
       } catch (jsonErr) {
-        // fallback if server returns raw token string
         data = await res.text();
       }
 
       if (res.ok) {
-        // support multiple shapes: raw string, { accessToken: "..." }, { token: "..." }
         const token =
           typeof data === "string"
             ? data
@@ -52,15 +35,17 @@ export default function Login() {
         if (token) {
           localStorage.setItem("accessToken", token);
           setStatus("Login successful — redirecting...");
-          // small delay so user sees message, then navigate
           setTimeout(() => window.location.assign("/home"), 400);
         } else {
-          // no token returned, but OK status — show raw response
           setStatus("Login succeeded but no token returned: " + JSON.stringify(data));
         }
       } else {
         const errMsg = (data && (data.error || data.message)) || JSON.stringify(data);
-        setStatus("Login failed: " + errMsg);
+        if (errMsg.includes("invalid")) {
+          setStatus("Invalid username or password. Please try again.");
+        } else {
+          setStatus("Login failed: " + errMsg);
+        }
       }
     } catch (err) {
       setStatus("Network error: " + String(err));
@@ -71,32 +56,38 @@ export default function Login() {
 
   return (
     <div className="login-container">
-      <form className="login-form" onSubmit={handleSubmit}>
-        <h2>Login</h2>
-        <div>
-          <input
-            placeholder="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <input
-            placeholder="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <div style={{ marginTop: 8 }}>
-          <button type="submit" disabled={loading}>
+      <div className="login-card">
+        <h2 className="login-title">Login</h2>
+        {status && <p className="error-message">{status}</p>}
+        <form onSubmit={handleSubmit}>
+          <div className="input-group">
+            <label htmlFor="username">Username</label>
+            <input
+              type="text"
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+          </div>
+          <div className="input-group">
+            <label htmlFor="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit" className="login-button" disabled={loading}>
             {loading ? "Logging in..." : "Login"}
           </button>
-        </div>
-        {status && <div style={{ marginTop: 12 }}>{status}</div>}
-      </form>
+        </form>
+        <p className="switch-form">
+          Don't have an account? <a href="/register" onClick={(e) => { e.preventDefault(); window.navigate('/register'); }}>Register</a>
+        </p>
+      </div>
     </div>
   );
 }

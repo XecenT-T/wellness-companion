@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Landing from "./Landing";
 import Home from "./Home";
 import Login from "./Login";
+import Register from "./Register";
 import Journal from "./components/Journal";
 import MEOWChat from "./components/MEOWChat";
 import CounselorDashboard from "./components/CounselorDashboard";
@@ -11,11 +12,6 @@ import Resources from "./components/Resources";
 
 const protectedRoutes = ["/home", "/meow", "/journal", "/dashboard", "/resources"];
 
-/**
- * Simple path router (no react-router)
- * - Adds window.navigate(to) for in-app navigation (uses history.pushState)
- * - Listens to popstate so back/forward works
- */
 function getRouteComponent(pathname) {
   const isAuthenticated = !!localStorage.getItem("accessToken");
 
@@ -26,6 +22,7 @@ function getRouteComponent(pathname) {
   if (pathname === "/" || pathname === "/landing") return <Landing />;
   if (pathname === "/home") return <Home />;
   if (pathname === "/login") return <Login />;
+  if (pathname === "/register") return <Register />;
   if (pathname === "/meow" || pathname === "/chat") return <MEOWChat />;
   if (pathname === "/dashboard" || pathname === "/counselor") return <CounselorDashboard />;
   if (pathname === "/resources") return <Resources />;
@@ -49,7 +46,6 @@ export default function App() {
     const onPop = () => setPath(window.location.pathname);
     window.addEventListener("popstate", onPop);
 
-    // expose navigate() so Header and other components can call it
     window.navigate = (to) => {
       if (!to || typeof to !== "string") return;
       if (to === window.location.pathname) return;
@@ -66,7 +62,7 @@ export default function App() {
   }, []);
 
   const Page = getRouteComponent(path);
-  const showHeaderFooter = !protectedRoutes.includes(path) && path !== "/login";
+  const showHeaderFooter = !protectedRoutes.includes(path) && path !== "/login" && path !== "/register";
 
   return (
     <div className="app-root">
