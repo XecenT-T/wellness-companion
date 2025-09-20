@@ -8,15 +8,24 @@ const BOT_RESPONSES = [
   "Remember small steps count — what's one small thing you can do today?"
 ];
 
-function sampleBotReply(userText) {
-  const t = userText.toLowerCase();
-  if (t.includes("exam") || t.includes("test") || t.includes("study")) {
-    return "Exams can be stressful — try our Exam Stress Decompression Kit in Resources. Want me to open it?";
+async function getBotReply(message) {
+  try {
+    const response = await fetch("http://localhost:3000/api/meow", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ message }),
+    });
+    if (!response.ok) {
+      throw new Error("API error");
+    }
+    const data = await response.json();
+    return data.reply || "Sorry, I'm having trouble thinking right now.";
+  } catch (error) {
+    console.error("Error fetching bot reply:", error);
+    return "Sorry, I couldn't connect to the server.";
   }
-  if (t.includes("sleep") || t.includes("insomnia")) {
-    return "Sleep routines help. I can share a short sleep hygiene routine or a 10-min guided breathing.";
-  }
-  return BOT_RESPONSES[Math.floor(Math.random() * BOT_RESPONSES.length)];
 }
 
 export default function MEOWChat(){
@@ -36,7 +45,7 @@ export default function MEOWChat(){
     }
   }, [messages]);
 
-  function sendMessage(e) {
+  async function sendMessage(e) {
     e?.preventDefault();
     const trimmed = text.trim();
     if (!trimmed) return;
@@ -44,12 +53,10 @@ export default function MEOWChat(){
     setMessages(prev => [...prev, userMsg]);
     setText("");
     setTyping(true);
-    setTimeout(() => {
-      const botText = sampleBotReply(trimmed);
-      const botMsg = { id: Date.now()+1, from: "bot", text: botText, ts: new Date().toISOString() };
-      setMessages(prev => [...prev, botMsg]);
-      setTyping(false);
-    }, 900 + Math.min(1400, trimmed.length * 30));
+    const botText = await getBotReply(trimmed);
+    const botMsg = { id: Date.now() + 1, from: "bot", text: botText, ts: new Date().toISOString() };
+    setMessages(prev => [...prev, botMsg]);
+    setTyping(false);
   }
 
   function clearConversation() {

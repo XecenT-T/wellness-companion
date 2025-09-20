@@ -14,7 +14,7 @@ export default function Home() {
 
   return (
     <div>
-      
+      <HomeNavigation />
       <main style={{ padding: 16 }}>
         <section id="home" className="welcome-section">
           <h2 className="welcome-gradient">Welcome, {username}</h2>

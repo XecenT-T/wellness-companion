@@ -8,7 +8,6 @@ import CounselorDashboard from "./components/CounselorDashboard";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Resources from "./components/Resources";
-import HomeNavigation from "./components/HomeNavigation";
 
 const protectedRoutes = ["/home", "/meow", "/journal", "/dashboard", "/resources"];
 
@@ -68,12 +67,10 @@ export default function App() {
 
   const Page = getRouteComponent(path);
   const showHeaderFooter = !protectedRoutes.includes(path) && path !== "/login";
-  const showHomeNavigation = protectedRoutes.includes(path);
 
   return (
     <div className="app-root">
       {showHeaderFooter && <Header />}
-      {showHomeNavigation && <HomeNavigation />}
       <main>{Page}</main>
       {showHeaderFooter && <Footer />}
     </div>
