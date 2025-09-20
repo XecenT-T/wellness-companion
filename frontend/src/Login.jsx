@@ -33,6 +33,7 @@ export default function Login() {
             : data?.accessToken || data?.token || data?.access_token || null;
 
         if (token) {
+          console.log("Token received from backend:", token);
           localStorage.setItem("accessToken", token);
           setStatus("Login successful — redirecting...");
           setTimeout(() => window.location.assign("/home"), 400);

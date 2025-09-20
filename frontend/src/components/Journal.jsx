@@ -20,31 +20,72 @@ function PlantIcon({ style }) {
 }
 
 export default function Journal() {
-  const [entries, setEntries] = useState(() => {
-    try { return JSON.parse(localStorage.getItem("journal_entries") || "[]"); } catch { return []; }
-  });
+  const [entries, setEntries] = useState([]);
   const [promptIndex, setPromptIndex] = useState(0);
   const [text, setText] = useState("");
-  const [tag, setTag] = useState("");
-  const [trees, setTrees] = useState(() => Number(localStorage.getItem("community_trees") || 0));
+  const [title, setTitle] = useState("");
+  const [trees, setTrees] = useState(0);
   const [selectedForum, setSelectedForum] = useState(FORUM_TOPICS[0].id);
 
   useEffect(() => {
-    localStorage.setItem("journal_entries", JSON.stringify(entries));
-  }, [entries]);
+    const fetchEntries = async () => {
+      try {
+        const token = localStorage.getItem("accessToken");
+        console.log("Token from localStorage in Journal.jsx:", token);
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/journal`, {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setEntries(data);
+        }
+      } catch (error) {
+        console.error("Error fetching journal entries:", error);
+      }
+    };
+    fetchEntries();
+  }, []);
 
   useEffect(() => {
-    localStorage.setItem("community_trees", String(trees));
-  }, [trees]);
+    const fetchJournalCount = async () => {
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/journal/count`);
+            if(res.ok) {
+                const data = await res.json();
+                setTrees(data.count);
+            }
+        } catch (error) {
+            console.error("Error fetching journal count:", error);
+        }
+    };
+    fetchJournalCount();
+  }, [entries]);
 
-  function saveEntry(e) {
+  async function saveEntry(e) {
     e?.preventDefault();
-    if (!text.trim()) return;
-    const entry = { id: Date.now(), text: text.trim(), tag, prompt: PROMPTS[promptIndex], ts: new Date().toISOString() };
-    setEntries(prev => [entry, ...prev]);
-    setText("");
-    setTag("");
-    setTrees(t => t + 1);
+    if (!text.trim() || !title.trim()) return;
+    try {
+      const token = localStorage.getItem("accessToken");
+      console.log("Token from localStorage in Journal.jsx (saveEntry):", token);
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/journal`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({ title, content: text }),
+      });
+      if (res.ok) {
+        const newEntry = await res.json();
+        setEntries(prev => [newEntry, ...prev]);
+        setText("");
+        setTitle("");
+      }
+    } catch (error) {
+      console.error("Error saving journal entry:", error);
+    }
   }
 
   function pickPrompt(delta = 1) {
@@ -52,11 +93,11 @@ export default function Journal() {
   }
 
   function clearForest() {
+    // This should ideally also clear the trees on the backend
     setTrees(0);
-    localStorage.removeItem("community_trees");
   }
 
-  const recentText = entries[0]?.text?.toLowerCase() || "";
+  const recentText = entries[0]?.content?.toLowerCase() || "";
   const personalized = {
     showExamKit: recentText.includes("exam") || recentText.includes("test") || recentText.includes("study"),
     showPeerBuddy: recentText.includes("lonely") || recentText.includes("friend") || recentText.includes("alone")
@@ -69,7 +110,7 @@ export default function Journal() {
           <div className="md:col-span-2">
             <div className="card p-6">
               <h2>Structured Digital Journal</h2>
-              <p className="text-muted">Daily prompts (CBT-inspired) — entries are private and stored on your device.</p>
+              <p className="text-muted">Daily prompts (CBT-inspired) — entries are private and stored on your account.</p>
 
               <form className="mt-4" onSubmit={saveEntry}>
                 <div className="flex items-center justify-between mb-3">
@@ -82,11 +123,11 @@ export default function Journal() {
 
                 <div className="bg-white rounded p-4 border mb-3">
                   <div className="text-sm italic text-[var(--teal)] mb-2">{PROMPTS[promptIndex]}</div>
+                  <input className="input w-full mb-2" placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} />
                   <textarea className="input w-full" rows={5} placeholder="Write your entry..." value={text} onChange={e => setText(e.target.value)} />
                 </div>
 
                 <div className="flex gap-3 mb-4">
-                  <input className="input" placeholder="Tag (e.g., exam, sleep, gratitude)" value={tag} onChange={e => setTag(e.target.value)} />
                   <button type="submit" className="btn btn-primary">Save Entry (Plant a Tree)</button>
                 </div>
               </form>
@@ -96,10 +137,10 @@ export default function Journal() {
                 {entries.length === 0 && <div className="text-muted">No entries yet — your first entry will plant a tree in the Community Forest.</div>}
                 <ul className="mt-2 space-y-3">
                   {entries.slice(0, 5).map(en => (
-                    <li key={en.id} className="p-3 bg-[var(--bg-soft-1)] rounded">
-                      <div className="text-sm text-muted mb-1">{new Date(en.ts).toLocaleString()}</div>
-                      <div className="text-sm">{en.text}</div>
-                      {en.tag && <div className="text-xs text-muted mt-1">Tag: {en.tag}</div>}
+                    <li key={en._id} className="p-3 bg-[var(--bg-soft-1)] rounded">
+                      <div className="text-sm text-muted mb-1">{new Date(en.createdAt).toLocaleString()}</div>
+                      <div className="font-semibold">{en.title}</div>
+                      <div className="text-sm">{en.content}</div>
                     </li>
                   ))}
                 </ul>
