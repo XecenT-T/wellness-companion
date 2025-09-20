@@ -20,7 +20,7 @@ export default function Landing() {
         <div className="card p-6">
           <h3 className="font-semibold mb-2">Personalized Chatbot</h3>
           <p className="text-sm text-muted mb-2">
-            M.E.O.W. is your conversational companion — it learns from your entries and suggests tailored exercises,
+            M.E.O.W.(Mental & Emotional Optimization Wellness companion) is your conversational companion — it learns from your entries and suggests tailored exercises,
             resources and prompts.
           </p>
           <ul className="text-sm space-y-1">

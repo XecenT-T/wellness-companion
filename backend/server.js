@@ -2,6 +2,7 @@ const express = require("express");
 const path = require("path");
 const fs = require("fs");
 const cors = require("cors");
+const helmet = require("helmet");
 require("dotenv").config();
 
 // DB connect helper (must export a function that returns a Promise)
@@ -11,7 +12,20 @@ const apiRouter = require("./routes/routes");     // your user routes
 const meowRouter = require("./routes/meowroutes"); // meow/model routes
 
 const app = express();
-app.use(cors());
+
+// Request logger middleware
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`);
+  next();
+});
+
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+// app.use(helmet());
 app.use(express.json()); // parse JSON bodies
 
 (async function start() {

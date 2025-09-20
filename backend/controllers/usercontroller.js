@@ -32,7 +32,7 @@ const register=asynchandler(async(req,res)=>{
         throw new Error("Failed to create user");
     }
     
-}) 
+})
 
 const login=asynchandler(async(req,res)=>{
     const{username,password}=req.body

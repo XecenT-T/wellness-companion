@@ -1,19 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
 
-const BOT_RESPONSES = [
-  "I'm here to listen — tell me what’s on your mind.",
-  "That sounds difficult. Would you like a breathing exercise or a short grounding technique?",
-  "You might try reframing that thought — what's a kinder alternative perspective?",
-  "If you'd like, I can suggest a resource or connect you to a counselor.",
-  "Remember small steps count — what's one small thing you can do today?"
-];
-
 async function getBotReply(message) {
   try {
-    const response = await fetch("http://localhost:3000/api/meow", {
+    const token = localStorage.getItem("accessToken");
+    console.log("Token from localStorage in MEOWChat.jsx (getBotReply):", token);
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/meow`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
       },
       body: JSON.stringify({ message }),
     });
@@ -29,17 +24,33 @@ async function getBotReply(message) {
 }
 
 export default function MEOWChat(){
-  const [messages, setMessages] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem("meow_messages") || "[]");
-    } catch { return []; }
-  });
+  const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
   const [typing, setTyping] = useState(false);
   const listRef = useRef(null);
 
   useEffect(() => {
-    localStorage.setItem("meow_messages", JSON.stringify(messages));
+    const fetchChatHistory = async () => {
+      try {
+        const token = localStorage.getItem("accessToken");
+        console.log("Token from localStorage in MEOWChat.jsx (fetchChatHistory):", token);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/meow/history`, {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setMessages(data.map(m => ({...m, id: m._id})));
+        }
+      } catch (error) {
+        console.error("Error fetching chat history:", error);
+      }
+    };
+    fetchChatHistory();
+  }, []);
+
+  useEffect(() => {
     if (listRef.current) {
       listRef.current.scrollTop = listRef.current.scrollHeight;
     }
@@ -60,8 +71,8 @@ export default function MEOWChat(){
   }
 
   function clearConversation() {
+    // This should ideally also clear the history on the backend
     setMessages([]);
-    localStorage.removeItem("meow_messages");
   }
 
   return (
@@ -83,7 +94,7 @@ export default function MEOWChat(){
                   <div className={`inline-block px-4 py-2 rounded-lg ${m.from === "user" ? "bg-teal-600 text-white" : "bg-white text-[var(--text-dark)]"} shadow-sm`}>
                     {m.text}
                   </div>
-                  <div className="text-xs text-muted mt-1">{new Date(m.ts).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</div>
+                  <div className="text-xs text-muted mt-1">{new Date(m.createdAt).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</div>
                 </div>
               ))}
 
